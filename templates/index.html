@@ -1,0 +1,93 @@
+<!-- ============================================================== -->
+<!-- m3u8 搜索工具 - 首页 HTML                                      -->
+<!-- 功能：搜索框 + 前端分页（上一页/下一页） + 一键复制           -->
+<!-- ============================================================== -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>m3u8 搜索工具</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <header class="header">
+        <h1 class="header-title">🔍 m3u8 搜索工具</h1>
+        <p class="header-desc">输入关键词搜索，前端分页翻页，一键复制</p>
+
+        <div class="search-box">
+            <input type="text"
+                   id="search-input"
+                   class="search-input"
+                   placeholder="请输入搜索关键词"
+                   autofocus />
+            <button id="search-btn" class="search-btn">🚀 搜索</button>
+        </div>
+
+        <p class="search-hint">
+            💡 按 <kbd>Enter</kbd> 快速搜索 &nbsp;|&nbsp;
+            目标：<code>{{ target_url }}</code>
+        </p>
+    </header>
+
+    <main class="main-content">
+
+        <!-- 加载状态 -->
+        <div id="loading" class="loading" style="display: none;">
+            <div class="loading-spinner"></div>
+            <p class="loading-text" id="loading-text">搜索中...</p>
+        </div>
+
+        <!-- 错误提示 -->
+        <div id="error-msg" class="error-msg" style="display: none;"></div>
+
+        <!-- 结果栏：统计 + 目录输入 + 全选 + 复制按钮 -->
+        <div id="result-bar" class="result-bar" style="display: none;">
+            <div class="result-stats" id="result-stats"></div>
+            <div class="result-actions">
+                <div class="dir-input-wrap">
+                    <label class="dir-label">📁 目录：</label>
+                    <input type="text" id="dir-input" class="dir-input" placeholder="输入目录名（可选）" />
+                </div>
+                <label class="select-all-wrap">
+                    <input type="checkbox" id="select-all-checkbox" /> 全选
+                </label>
+                <button id="copy-all-btn" class="copy-all-btn">📋 复制选中</button>
+            </div>
+        </div>
+
+        <!-- 分页控制（移到上方） -->
+        <div id="pagination" class="pagination" style="display: none;">
+            <button id="prev-page-btn" class="page-btn">⬅ 上一页</button>
+            <span id="page-info" class="page-info">第 1 / 1 页</span>
+            <button id="next-page-btn" class="page-btn">下一页 ➡</button>
+        </div>
+
+        <!-- 结果显示 -->
+        <div id="result-list" class="result-list"></div>
+
+        <!-- 图片放大预览弹窗 -->
+        <div id="img-preview" class="img-preview-overlay" style="display: none;">
+            <span class="img-preview-close">✕</span>
+            <img id="img-preview-src" class="img-preview-img" src="" alt="预览" />
+        </div>
+
+        <!-- 隐藏textarea用于复制 -->
+        <textarea id="copy-textarea" style="position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0;"></textarea>
+
+        <!-- 空状态 -->
+        <div id="empty-state" class="empty-state">
+            <div class="empty-icon">📺</div>
+            <p class="empty-text">在上方输入关键词开始搜索</p>
+        </div>
+
+    </main>
+
+    <footer class="footer">
+        <p>m3u8 搜索工具 &nbsp;|&nbsp; 前端分页 &nbsp;|&nbsp; 仅供学习交流</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
