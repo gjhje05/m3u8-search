@@ -1,0 +1,16 @@
+# ============================================
+# m3u8 搜索工具 - Python 依赖包列表
+# 安装方式: pip install -r requirements.txt
+# ============================================
+
+# Flask - Web 框架，用来搭建 HTTP 服务器和处理请求
+flask>=3.0
+
+# requests - HTTP 请求库，用来爬取目标网站的页面
+requests>=2.31
+
+# beautifulsoup4 - HTML 解析库，用来提取页面中的数据
+beautifulsoup4>=4.12
+
+# lxml - 高效的 HTML/XML 解析器，给 BeautifulSoup 用
+lxml>=5.0

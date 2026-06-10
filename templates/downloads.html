@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>📥 下载管理</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/downloads.css') }}">
+</head>
+<body>
+
+    <!-- ===== 顶部导航 ===== -->
+    <header class="dl-header">
+        <a href="{{ url_for('index') }}" class="dl-back-btn">← 搜索</a>
+        <h1 class="dl-header-title">📥 下载管理</h1>
+        <button id="dl-refresh-btn" class="dl-header-btn" title="刷新">↻</button>
+    </header>
+
+    <!-- ===== 标签页 ===== -->
+    <div class="dl-tabs">
+        <button class="dl-tab active" data-tab="downloading">⬇️ 下载中</button>
+        <button class="dl-tab" data-tab="waiting">⏳ 等待中</button>
+        <button class="dl-tab" data-tab="completed">✅ 已完成</button>
+        <button class="dl-tab" data-tab="failed">❌ 失败/取消</button>
+    </div>
+
+    <!-- ===== 保存目录 + 线程数栏 ===== -->
+    <div class="dl-save-dir-bar">
+        <label class="dl-save-dir-label">💾 保存到：</label>
+        <input type="text" id="dl-save-dir-input" class="dl-save-dir-input"
+               placeholder="默认：~/Downloads/m3u8_downloads" />
+        <button id="dl-reset-dir" class="tiny-btn" title="重置为默认目录">↺</button>
+        <span class="dl-sep">|</span>
+        <label class="dl-save-dir-label">🧵 线程：</label>
+        <input type="number" id="dl-thread-input" class="dl-thread-input"
+               value="36" min="1" max="128" title="每个任务的并行下载线程数" />
+        <span class="dl-sep">|</span>
+        <label class="dl-save-dir-label">📊 并发任务：</label>
+        <input type="number" id="dl-concurrent-input" class="dl-thread-input"
+               value="3" min="1" max="20" title="同时运行的任务数" />
+    </div>
+
+    <!-- ===== 统计栏 ===== -->
+    <div class="dl-stats-bar">
+        <span id="dl-stats-text">加载中...</span>
+        <span class="dl-stats-actions">
+            <button id="dl-clear-queue-btn" class="dl-clear-btn dl-btn-waiting">⏳ 清空等待</button>
+            <button id="dl-clear-all-btn" class="dl-clear-btn">🗑️ 清除已完成</button>
+        </span>
+    </div>
+
+    <!-- ===== 任务列表 ===== -->
+    <div id="dl-content" class="dl-content">
+        <!-- 加载动画 -->
+        <div id="dl-loading" class="dl-loading">
+            <div class="dl-spinner"></div>
+            <p>加载中...</p>
+        </div>
+        <!-- 空状态 -->
+        <div id="dl-empty" class="dl-empty" style="display:none;">
+            <div class="dl-empty-icon">📭</div>
+            <p class="dl-empty-text" id="dl-empty-text">暂无下载任务</p>
+        </div>
+        <!-- 任务列表 -->
+        <div id="dl-task-list" class="dl-task-list"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/downloads.js') }}?v=20260610"></script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+
+# Test / debug
+server.log
+test_*.py
+test_*.json
+test_*.txt
+api_test.json
+diagnose.py
+github_upload.py
+update_app.py
+
+# IDE
+.idea/
+*.swp
+*.swo
+.vscode/
+
+# Download temp
+**/.tmp_*/
+
+# Task persistence (auto-generated)
+download_tasks.json
+
+# OS
+.DS_Store
+Thumbs.db
