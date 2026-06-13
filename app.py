@@ -386,24 +386,72 @@ def download_segments_parallel(task_id, segments, m3u8_url, temp_dir, task_ref):
         return completed_count[0], downloaded_bytes[0], list(seg_status)
 
 
-def merge_segments(task_id, temp_dir, output_path, seg_status, total_segs, seg_ext='.ts'):
+def get_init_segment(m3u8_url, temp_dir):
+    """
+    For fmp4 streams, download the #EXT-X-MAP init segment.
+    Returns path to the init segment file, or None.
+    """
+    try:
+        session = requests.Session()
+        session.verify = False
+        session.headers.update(HEADERS)
+        resp = session.get(m3u8_url, timeout=(TIMEOUT_CONNECT, TIMEOUT_READ))
+        resp.encoding = 'utf-8'
+        content = resp.text
+        init_uri = None
+        for line in content.split(chr(10)):
+            line = line.strip()
+            if line.startswith('#EXT-X-MAP:'):
+                m = re.search(r'URI="([^"]+)"', line)
+                if m:
+                    init_uri = m.group(1)
+                    break
+        if not init_uri:
+            return None
+        init_url = resolve_url(m3u8_url, init_uri)
+        data, sc, err = download_with_retry(session, init_url)
+        if data is None or len(data) < 32:
+            log.warning(f"[init] download failed or too small: {err}")
+            return None
+        init_path = os.path.join(temp_dir, 'seg_init.dat')
+        with open(init_path, 'wb') as f:
+            f.write(data)
+        log.info(f"[init] downloaded {len(data)} bytes from {init_uri}")
+        return init_path
+    except Exception as e:
+        log.warning(f"[init] error: {e}")
+        return None
+
+
+def merge_segments(task_id, temp_dir, output_path, seg_status, total_segs, seg_ext='.ts', m3u8_url=None):
     if not FFMPEG_PATH:
         return False, "ffmpeg not installed"
     try:
         concat_file = os.path.join(temp_dir, 'concat.txt')
         seg_count = 0
         with open(concat_file, 'w', encoding='utf-8') as f:
+            # For fmp4, prepend the init segment first
+            init_path = None
+            if seg_ext == '.m4s' and m3u8_url:
+                init_path = get_init_segment(m3u8_url, temp_dir)
+            if init_path and os.path.exists(init_path):
+                f.write(f"file '{os.path.abspath(init_path).replace(chr(92), '/')}'" + chr(10))
+                seg_count += 1
             for i in range(total_segs):
                 found = False
-                for ext in (seg_ext, '.ts' if seg_ext != '.ts' else '.m4s'):
+                for ext in ('.ts', '.m4s', '.dat'):
                     seg_path = os.path.join(temp_dir, f'seg_{i:05d}{ext}')
                     if os.path.exists(seg_path):
+                        # Validate segment size: skip if too small (likely error page)
+                        sz = os.path.getsize(seg_path)
+                        if sz < 100:
+                            continue
                         f.write(f"file '{os.path.abspath(seg_path).replace(chr(92), '/')}'" + chr(10))
                         seg_count += 1
                         found = True
                         break
         if seg_count == 0:
-            return False, "no segments to merge"
+            return False, "no valid segments to merge"
         log.info(f"[{task_id}] merging {seg_count}/{total_segs} segs -> {os.path.basename(output_path)}")
         update_task_progress(task_id, status='merging', progress=95, speed='')
         merge_cmd = [
@@ -655,7 +703,7 @@ def download_worker(task_id, url, title, save_dir, episode_num=0, thread_count=N
             shutil.rmtree(temp_dir, ignore_errors=True)
             download_ffmpeg_direct(task_id, url, output_path)
             return
-        merge_ok, merge_err = merge_segments(task_id, temp_dir, output_path, seg_status, total_segs, seg_ext)
+        merge_ok, merge_err = merge_segments(task_id, temp_dir, output_path, seg_status, total_segs, seg_ext, url)
         shutil.rmtree(temp_dir, ignore_errors=True)
         if merge_ok:
             fail_count = sum(1 for s in seg_status if s == 2)
